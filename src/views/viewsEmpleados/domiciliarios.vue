@@ -120,7 +120,8 @@ export default {
             }
             
             this.dialogo_crud_domiciliario=true
-        },
+            // me escuchas?
+        },//nada
         async crear_domiciliario(){
            try {
                let domiciliario = await this.$store.dispatch('apis/llamado_post',{
