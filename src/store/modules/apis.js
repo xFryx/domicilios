@@ -3,28 +3,32 @@ const axios = require('axios').default
 export default {
   namespaced: true,
   state: {
-    consumers: []
+    consumers: [],
+    token: null,
   },
   mutations: {
     
   },
   actions: {
-   async listar_domiciliarios({rootState,dispatch},domiciliario){
+   async listar_domiciliarios({rootState,dispatch}){
     console.log(dispatch)
         console.log(rootState.datos_sesion)
-        rootState.domiciliarios.domiciliarios.push(domiciliario)
-       /*
+       
+       
       
         try {
             let response = await dispatch('llamado_get',{
-                url:"",
-                tipo_header: "",
+                url:"http://localhost:8081/one/domiciliario/domiciliarios",
+                tipo_header: "otro",
             })
             console.log(response)
+            rootState.domiciliarios.domiciliarios = [...response.data]
+            console.log(  rootState.domiciliarios.domiciliarios)
+          
         } catch (error) {
             console.log(error)
         }
-        */
+        
    },
    async llamado_get({dispatch},{url,tipo_header}){
        console.log(url)
@@ -139,22 +143,44 @@ export default {
                  })
         })
     },
-   async generar_header({dispatch},tipo_header){
+   async generar_header({state,dispatch},tipo_header){
 
-        let obj_header, header
-        
+        let obj_header,header,token
+         
+         
         switch (tipo_header) {
             case 'parse':
                 header = await dispatch('auth','parse')
                 obj_header = {   
                     "Access-Control-Allow-Origin": "*",
                     'Content-Type' : 'application/json',
-                    'X-Parse-REST-API-Key': 'LASDK823JKHR87SDFJSDHF8DFHASFDF',
-                    'X-Parse-Application-Id': 'KSDJFKASJFI3S8DSJFDH',
+                    
+                    'X-Parse-REST-API-Key': '',
+                    'X-Parse-Application-Id': '',
                     'Authorization': header
+                    
                 }
                 break;
+            case 'auth':
+                token = new RegExp(`XSRF-TOKEN=([^;]+)`) //document.cookie.match(new RegExp(`XSRF-TOKEN=([^;]+)`))[1];
+                console.log(token)
+                obj_header = {   
+                    "Access-Control-Allow-Origin": "*",
+                    'Content-Type' : 'application/json',
+                    
+                    //"X-XSRF-TOKEN": token
+                    
+                }
+                break;
+                
                 default: 
+              
+                obj_header = {   
+                    "Access-Control-Allow-Origin": "*",
+                    'Content-Type' : 'application/json',
+                    "Authorization" : 'Bearer '+ state.token
+
+                }
                 break;
         }
           return obj_header

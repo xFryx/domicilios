@@ -2,9 +2,9 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 import store from '../store'
-import datos_sesion from '../store/modules/datos_sesion'
+import apis from '../store/modules/apis'
 console.log(store)
-console.log(datos_sesion)
+//console.log(datos_sesion)
 //Vue.use(VueRouter)
 //console.log(dataUser)
 
@@ -19,28 +19,28 @@ const routes = [
         path: '/empleados',
         name: 'empleados',
         component: () => import(/* webpackChunkName: "home_jefe" */ '../views/empleados.vue'),
-       /*
-        beforeEnter: (to, from, next) => {
-            console.log(to, from)
-            console.log(datos_sesion.state.datos)
         
-            try {
-                
-                if(datos_sesion.state.datos!=null){
-                    next()
-                } else{
-                    next({
-                        path: '/',
-                    })
-                }
-                
+            beforeEnter: (to, from, next) => {
+                console.log(to, from)
+                console.log(apis.state.token)
+            
+                try {
+                    
+                    if(apis.state.token!=null){
+                        next()
+                    } else{
+                        next({
+                            path: '/',
+                        })
+                    }
+                    
 
-            } catch (error) {
-                console.log(error)
-            }
-         
-        },
-          */ 
+                } catch (error) {
+                    console.log(error)
+                }
+            
+            },
+
         children: [
             {
                 path: '/empleados',

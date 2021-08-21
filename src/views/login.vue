@@ -45,7 +45,7 @@
                                             </v-text-field>
                                         </v-card-text>
                                         <v-card-actions class="ma-5">
-                                            <v-btn @click="login"   dark large block color="purple darken-1">Login</v-btn>
+                                            <v-btn @click="login()"   dark large block color="purple darken-1">Login</v-btn>
                                             
                                         </v-card-actions>
                                     </v-card>
@@ -74,12 +74,41 @@ export default {
         }
     },
     created(){
-
+        //console.log(document.cookie.match(new RegExp(`XSRF-TOKEN=([^;]+)`)))
+        
+        //console.log(cookie.match(new RegExp(`XSRF-TOKEN=([^;]+)`)))
+        //console.log(new RegExp(`XSRF-TOKEN=([^;]+)`))
     },
     methods: {
-        login(){
-
-            this.$router.push({name: "pedidos"})
+       async login(){
+            
+            
+            try {
+               let token = await this.$store.dispatch('apis/llamado_post',{
+                    url: "http://localhost:8081/one/auth/signin",
+                    body: {
+                            "username": "Andree12",
+                            "password": "123123"
+                            
+                        },
+                    tipo_header: "auth"
+                })
+                console.log(token)
+                this.$store.state.apis.token = token.data.accessToken 
+                this.$store.state.datos_sesion.datos = token.data
+                this.$router.push({name: "pedidos"})
+            } catch (error) {
+                this.$store.commit('dialogos/respuesta',{
+                    mensaje: "WHAT IS THIS POKEMON? IS PIKACHU. NOOO IS CHARMANDER FUCKKKKKKKK",
+                    color: "red",
+                    tipo:"Usuaario no encontrado"
+                })
+                console.log(error)
+            }
+            
+            
+            
+            //
         }
     }
 }

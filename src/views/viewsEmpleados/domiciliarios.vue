@@ -64,16 +64,7 @@ export default {
         }
     },
     created(){
-        this.$store.dispatch('apis/listar_domiciliarios',{
-            nombre: "Fry",
-            celular: 123,
-            objectId: "1",
-            direccion: "Unimag",
-            cedula: 123,
-            placa_moto: "123",
-            
-
-        })
+        this.$store.dispatch('apis/listar_domiciliarios')
     },
     methods: {
         eliminar_asignar(domiciliario){
@@ -83,6 +74,13 @@ export default {
         },
         async eliminar_domiciliario(){
             try {
+
+                let domiciliario = await this.$store.dispatch('apis/llamado_delete',{
+                   url: "http://localhost:8081/one/domiciliario/domiciliarios/"+this.$store.state.domiciliarios.domiciliario.objectId,
+                   tipo_header: "otro"
+                })
+                console.log(domiciliario)
+
                 let index = this.$store.state.domiciliarios.domiciliarios.map(function(e) { return e.objectId; }).indexOf(this.$store.state.domiciliarios.domiciliario.objectId);
                 this.$store.state.domiciliarios.domiciliarios.splice(index,1)
 
@@ -107,9 +105,9 @@ export default {
         crear(){
             
             this.$store.state.domiciliarios.domiciliario = {
-               nombre: "",
+                nombre: "",
                 celular: null,
-                objectId: "",
+                //objectId: "",
                 direccion: "",
                 cedula: null,
                 placa_moto: "",
@@ -125,7 +123,20 @@ export default {
         },
         async crear_domiciliario(){
            try {
-                this.$store.state.domiciliarios.domiciliarios.push({...this.$store.state.domiciliarios.domiciliario, objectId: Date.parse(new Date()).toString()  })
+               let domiciliario = await this.$store.dispatch('apis/llamado_post',{
+                   url: "http://localhost:8081/one/domiciliario/domiciliarios",
+                   body: {
+                       nombre: this.$store.state.domiciliarios.domiciliario.nombre,
+                       celular: parseInt( this.$store.state.domiciliarios.domiciliario.celular),
+                       cedula: parseInt( this.$store.state.domiciliarios.domiciliario.cedula),
+                       placa_moto: this.$store.state.domiciliarios.domiciliario.placa_moto,
+                       direccion: this.$store.state.domiciliarios.domiciliario.direccion
+                   },
+                   tipo_header: "otro"
+               })
+
+                console.log(domiciliario)
+                this.$store.state.domiciliarios.domiciliarios.push({...domiciliario.data})
 
                 this.$store.commit('dialogos/respuesta',{
                     tipo: "Exitoso",
@@ -151,6 +162,20 @@ export default {
         },
         async editar_domiciliario(){
             try {
+
+                let domiciliario = await this.$store.dispatch('apis/llamado_put',{
+                   url: "http://localhost:8081/one/domiciliario/domiciliarios/"+this.$store.state.domiciliarios.domiciliario.objectId,
+                   body: {
+                       nombre: this.$store.state.domiciliarios.domiciliario.nombre,
+                       celular: parseInt( this.$store.state.domiciliarios.domiciliario.celular),
+                       cedula: parseInt( this.$store.state.domiciliarios.domiciliario.cedula),
+                       placa_moto: this.$store.state.domiciliarios.domiciliario.placa_moto,
+                       direccion: this.$store.state.domiciliarios.domiciliario.direccion
+                   },
+                   tipo_header: "otro"
+               })
+
+                console.log(domiciliario)
                 let index = this.$store.state.domiciliarios.domiciliarios.map(function(e) { return e.objectId; }).indexOf(this.$store.state.domiciliarios.domiciliario.objectId);
                 
                 console.log(index)
@@ -176,7 +201,7 @@ export default {
              this.$store.state.domiciliarios.domiciliario = {
                 nombre: "",
                 celular: null,
-                objectId: "",
+                //objectId: "",
                 direccion: "",
                 cedula: null,
                 placa_moto: "",

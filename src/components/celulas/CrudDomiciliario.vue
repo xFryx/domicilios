@@ -80,9 +80,10 @@ export default {
         },
         async crear_domiciliario(){
             console.log('?')
-            if( this.$store.state.domiciliarios.domiciliario.objectId == ""){
+            if( typeof this.$store.state.domiciliarios.domiciliario.objectId == 'undefined'){
                 this.$emit('crear')
             }else{
+                console.log('editar')
                 this.$emit('editar')
             }
         }

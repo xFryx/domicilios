@@ -5,7 +5,7 @@ export default {
       domiciliario: {
           nombre: "",
           celular: null,
-          objectId: "",
+          //objectId: "",
           direccion: "",
           cedula: null,
           placa_moto: "",

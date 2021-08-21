@@ -129,7 +129,7 @@
             
                         <v-card-text>
                             <v-autocomplete
-                                    :items="domiciliarios" 
+                                    :items="$store.state.domiciliarios.domiciliarios" 
                                     :item-text="'nombre'" v-model="pedido.domiciliario" 
                                     return-object filled rounded dense
                                     label="Domiciliario"
@@ -195,30 +195,87 @@ export default {
         }
     },
     created(){
-        this.$store.dispatch('apis/listar_domiciliarios',{
-            nombre: "Fry",
-            celular: "3001"
-        })
-        this.$store.dispatch('apis/listar_domiciliarios',{
-            nombre: "Andree",
-            celular: "3001"
-        })
-        this.$store.dispatch('apis/listar_domiciliarios',{
-            nombre: "Pizarro",
-            celular: "3001"
-        })
+        this.$store.dispatch('apis/listar_domiciliarios')
+       
     },
     methods: {
       
         async nuevo_pedido(pedido){
+            console.log(pedido)
             try {
+                let solicitante = await this.$store.dispatch('apis/llamado_post',{
+                    url: "http://localhost:8081/one/solicitante/Solicitantes",
+                    body: {
+                        nombre: pedido.solicitante.nombre,
+                        telefono: pedido.solicitante.celular.toString()
+                        //direccion: 
+                    },
+                    tipo_header: "otro"
+                })
+                console.log(solicitante)
+                console.log('ddasda')
+                let pedido_body = {
+                    idSol: solicitante.data.id,
+                    idDomi: pedido.domiciliario.id,
+
+                    horaSalida: new Date(pedido.solicitante.hora) ,
+                    estado: "Pendientes",
+                    nombreDes: pedido.destinatario.nombre,
+                    dirDes: pedido.destinatario.direccion,
+                    coorDes: "",
+                    horaDes: new Date(pedido.destinatario.hora),
+                    dirSalida: pedido.solicitante.direccion,
+                    coorSalida: "",
+                    //horaDes: new Date(pedido.solicitante.hora),
+                    telefonoDes: pedido.destinatario.celular.toString(),
+                    observacion: pedido.solicitante.observacion,
+                    id_Domiciliario: pedido.domiciliario.objectId,
+                    id_Solicitante: solicitante.data.id
+                    //direccion: 
+                    }
+                let domicilio = await this.$store.dispatch('apis/llamado_post',{
+                    url: "http://localhost:8081/one/domicilio/domicilios",
+                    body: pedido_body,
+                    tipo_header: "otro"
+                })
+                console.log(domicilio)
+                let body_2 = {
+                            mensajero: {
+                                        nombre: pedido.domiciliario.nombre,
+                                        celular: pedido.domiciliario.celular
+                                    },
+                                    solicitante: {
+                                        nombre: solicitante.data.nombre,
+                                        celular: solicitante.data.telefono,
+                                        direccion: pedido.solicitante.direccion,
+                                        hora: new Date(pedido.solicitante.hora),
+                                        observacion:pedido.solicitante.observacion
+
+                                    },
+                                    destinatario: {
+                                        nombre: pedido.destinatario.nombre,
+                                        celular:  pedido.destinatario.celular,
+                                        direccion:  pedido.destinatario.direccion,
+                                        hora:  new Date(pedido.destinatario.hora),
+                                    }
+                        }
                 this.$store.state.datos_sesion.pedidos.unshift(
                     {
-                        id: Date.parse(new Date) ,
+                        id: domicilio.data.idDomicilio ,
                         title: pedido.destinatario.direccion,
                         subtitle: pedido.destinatario.hora,
-                        data: {...pedido}
-                    })  
+                        data: {...body_2},
+                        estado: "Pendientes"
+                    })
+                this.$store.state.datos_sesion.pedidos_filtrados.unshift(
+                    {
+                        id: domicilio.data.idDomicilio ,
+                        title: pedido.destinatario.direccion,
+                        subtitle: pedido.destinatario.hora,
+                        data:  {...body_2},
+                        estado: "Pendientes"
+                    })
+                  
                 
                 console.log(this.$store.state.datos_sesion.pedidos)
                 this.$store.commit('dialogos/respuesta',{

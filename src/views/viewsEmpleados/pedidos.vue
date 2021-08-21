@@ -204,11 +204,70 @@ export default {
         }
     },
     async created(){
-        this.listar(8)
+        this.listar()
     },
     methods: {
-       async listar(page){
+       async listar(){
+           this.$store.state.datos_sesion.pedidos = []
            try {
+                      let pedidos = await this.$store.dispatch('apis/llamado_get',{
+                        url:"http://localhost:8081/one/domicilio/domicilios",
+                        tipo_header: "otro",
+                    })
+                    console.log(pedidos)
+                    
+                    for (let index = 0; index < pedidos.data.length; index++) {
+                        console.log( pedidos.data[index])
+                            try {
+                                let domiciliario = await this.$store.dispatch('apis/llamado_get',{
+                                url: "http://localhost:8081/one/domiciliario/domiciliarios/"+pedidos.data[index].id_Domiciliario,
+                                tipo_header: "otro"
+                            })
+                            let solicitante = await this.$store.dispatch('apis/llamado_get',{
+                                url: "http://localhost:8081/one/solicitante/Solicitantes/"+pedidos.data[index].id_Solicitante,
+                                tipo_header: "otro"
+                            })
+
+                            console.log(domiciliario)
+                            console.log(solicitante)
+
+                            this.$store.state.datos_sesion.pedidos.unshift({
+                                id: pedidos.data[index].idDomicilio,
+                                title: pedidos.data[index].dirDes,
+                                subtitle: pedidos.data[index].horaDes,
+                                data: {
+                                    mensajero: {
+                                        nombre: domiciliario.data.nombre,
+                                        celular: domiciliario.data.celular
+                                    },
+                                    solicitante: {
+                                        nombre: solicitante.data.nombre,
+                                        celular: solicitante.data.telefono,
+                                        direccion: pedidos.data[index].dirSalida,
+                                        hora: pedidos.data[index].horaSalida,
+                                        observacion: pedidos.data[index].observacion
+
+                                    },
+                                    destinatario: {
+                                        nombre: pedidos.data[index].nombreDes,
+                                        celular:  pedidos.data[index].telefonoDes,
+                                        direccion:  pedidos.data[index].dirDes,
+                                        hora: pedidos.data[index].horaDes,
+                                    }
+                                },
+                                estado:  pedidos.data[index].estado
+
+                            })
+                        } catch (error) {
+                            console.log(error)
+                        }
+                       
+                        
+                    }
+
+
+                    /*
+                   
                     for (let index = 0; index < page; index++) {
                         let estado = 'Pendientes'
                         if(index%2==0){
@@ -241,8 +300,9 @@ export default {
                         })
                         
                     }
+                    */
                     this.$store.state.datos_sesion.pedidos_filtrados = [...this.$store.state.datos_sesion.pedidos]
-                 console.log(page)
+                 //console.log(page)
            } catch (error) {
                console.log(error)
            }
@@ -265,7 +325,17 @@ export default {
             return false
         },
         async cancelar_pedido(pedido){
+            console.log(this.$store.state.datos_sesion.pedidos)
+            console.log(pedido)
             try {
+                let cancelar = await this.$store.dispatch('apis/llamado_put',{
+                    url:"http://localhost:8081/one/domicilio/estado/"+pedido.id,
+                    body: {
+                        estado: 'Cerrados',
+                    },
+                    tipo_header: "otro"
+                })
+                console.log(cancelar)
                 let index = this.$store.state.datos_sesion.pedidos.map(function(e) { return e.id; }).indexOf(pedido.id);
                 
                 console.log(index)
